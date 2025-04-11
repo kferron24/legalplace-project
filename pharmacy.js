@@ -1,3 +1,15 @@
+export const specificDrugNames = {
+  herbalTea: "Herbal Tea",
+  fervex: "Fervex",
+  magicPills: "Magic Pill",
+};
+
+export const EXPIRED_DATE = 0;
+export const BENEFIT_MAX = 50;
+export const BENEFIT_MIN = 0;
+export const FERVEX_DOUBLE_INCREASE_DATE = 11;
+export const FERVEX_TRIPLE_INCREASE_DATE = 6;
+
 export class Drug {
   constructor(name, expiresIn, benefit) {
     this.name = name;
@@ -10,57 +22,97 @@ export class Pharmacy {
   constructor(drugs = []) {
     this.drugs = drugs;
   }
+  increaseBenefit(drug) {
+    drug.benefit++;
+  }
+
+  decreaseBenefit(drug) {
+    drug.benefit--;
+  }
+
+  isNotMaxBenefit(drug) {
+    return drug.benefit < BENEFIT_MAX;
+  }
+
+  isNotMinBenefit(drug) {
+    return drug.benefit > BENEFIT_MIN;
+  }
+
+  isHerbalTea(drug) {
+    return drug.name === specificDrugNames.herbalTea;
+  }
+
+  isFervex(drug) {
+    return drug.name === specificDrugNames.fervex;
+  }
+
+  isMagicPills(drug) {
+    return drug.name === specificDrugNames.magicPills;
+  }
+
   updateBenefitValue() {
-    for (var i = 0; i < this.drugs.length; i++) {
-      if (
-        this.drugs[i].name != "Herbal Tea" &&
-        this.drugs[i].name != "Fervex"
-      ) {
-        if (this.drugs[i].benefit > 0) {
-          if (this.drugs[i].name != "Magic Pill") {
-            this.drugs[i].benefit = this.drugs[i].benefit - 1;
-          }
-        }
-      } else {
-        if (this.drugs[i].benefit < 50) {
-          this.drugs[i].benefit = this.drugs[i].benefit + 1;
-          if (this.drugs[i].name == "Fervex") {
-            if (this.drugs[i].expiresIn < 11) {
-              if (this.drugs[i].benefit < 50) {
-                this.drugs[i].benefit = this.drugs[i].benefit + 1;
-              }
-            }
-            if (this.drugs[i].expiresIn < 6) {
-              if (this.drugs[i].benefit < 50) {
-                this.drugs[i].benefit = this.drugs[i].benefit + 1;
-              }
-            }
-          }
-        }
+    for (let i = 0; i < this.drugs.length; i++) {
+      const drug = this.drugs[i];
+      this.handleUpdateBenefit(drug);
+
+      if (!this.isMagicPills(drug)) {
+        drug.expiresIn--;
       }
-      if (this.drugs[i].name != "Magic Pill") {
-        this.drugs[i].expiresIn = this.drugs[i].expiresIn - 1;
-      }
-      if (this.drugs[i].expiresIn < 0) {
-        if (this.drugs[i].name != "Herbal Tea") {
-          if (this.drugs[i].name != "Fervex") {
-            if (this.drugs[i].benefit > 0) {
-              if (this.drugs[i].name != "Magic Pill") {
-                this.drugs[i].benefit = this.drugs[i].benefit - 1;
-              }
-            }
-          } else {
-            this.drugs[i].benefit =
-              this.drugs[i].benefit - this.drugs[i].benefit;
-          }
-        } else {
-          if (this.drugs[i].benefit < 50) {
-            this.drugs[i].benefit = this.drugs[i].benefit + 1;
-          }
-        }
+
+      if (drug.expiresIn < EXPIRED_DATE) {
+        this.handleExpired(drug);
       }
     }
 
     return this.drugs;
+  }
+
+  handleUpdateBenefit(drug) {
+    if (this.isHerbalTea(drug) || this.isFervex(drug)) {
+      this.increaseDrugBenefit(drug);
+    } else {
+      this.decreaseDrugBenefit(drug);
+    }
+  }
+
+  decreaseDrugBenefit(drug) {
+    if (this.isNotMinBenefit(drug) && !this.isMagicPills(drug)) {
+      this.decreaseBenefit(drug);
+    }
+  }
+
+  increaseDrugBenefit(drug) {
+    if (this.isNotMaxBenefit(drug)) {
+      this.increaseBenefit(drug);
+
+      if (this.isFervex(drug)) {
+        if (
+          drug.expiresIn < FERVEX_DOUBLE_INCREASE_DATE &&
+          this.isNotMaxBenefit(drug)
+        ) {
+          this.increaseBenefit(drug);
+        }
+        if (
+          drug.expiresIn < FERVEX_TRIPLE_INCREASE_DATE &&
+          this.isNotMaxBenefit(drug)
+        ) {
+          this.increaseBenefit(drug);
+        }
+      }
+    }
+  }
+
+  handleExpired(drug) {
+    if (this.isHerbalTea(drug)) {
+      if (this.isNotMaxBenefit(drug)) {
+        this.increaseBenefit(drug);
+      }
+    } else if (this.isFervex(drug)) {
+      drug.benefit = BENEFIT_MIN;
+    } else {
+      if (this.isNotMinBenefit(drug) && !this.isMagicPills(drug)) {
+        this.decreaseBenefit(drug);
+      }
+    }
   }
 }
