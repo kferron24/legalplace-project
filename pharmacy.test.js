@@ -93,12 +93,21 @@ describe("Pharmacy", () => {
     ]);
   });
 
+  it("should double decrease Dafalgan benefit", () => {
+    const pharmacy = new Pharmacy([
+      new Drug(specificDrugNames.dafalgan, 10, 30),
+    ]);
+    const updatedDrugs = pharmacy.updateBenefitValue();
+    expect(updatedDrugs).toEqual([new Drug(specificDrugNames.dafalgan, 9, 28)]);
+  });
+
   it("should handle multiple drugs correctly", () => {
     const drugs = [
       new Drug("Doliprane", 2, 10),
       new Drug(specificDrugNames.herbalTea, 5, 20),
       new Drug(specificDrugNames.fervex, 10, 30),
       new Drug(specificDrugNames.magicPills, 4, 7),
+      new Drug(specificDrugNames.dafalgan, 10, 25),
     ];
     const pharmacy = new Pharmacy(drugs);
     const updatedDrugs = pharmacy.updateBenefitValue();
@@ -108,6 +117,7 @@ describe("Pharmacy", () => {
       new Drug(specificDrugNames.herbalTea, 4, 21),
       new Drug(specificDrugNames.fervex, 9, 32),
       new Drug(specificDrugNames.magicPills, 4, 7),
+      new Drug(specificDrugNames.dafalgan, 9, 23),
     ]);
   });
 });

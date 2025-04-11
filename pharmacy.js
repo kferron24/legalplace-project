@@ -2,6 +2,7 @@ export const specificDrugNames = {
   herbalTea: "Herbal Tea",
   fervex: "Fervex",
   magicPills: "Magic Pill",
+  dafalgan: "Dafalgan",
 };
 
 export const EXPIRED_DATE = 0;
@@ -50,6 +51,10 @@ export class Pharmacy {
     return drug.name === specificDrugNames.magicPills;
   }
 
+  isDafalgan(drug) {
+    return drug.name === specificDrugNames.dafalgan;
+  }
+
   updateBenefitValue() {
     for (let i = 0; i < this.drugs.length; i++) {
       const drug = this.drugs[i];
@@ -72,6 +77,9 @@ export class Pharmacy {
       this.increaseDrugBenefit(drug);
     } else {
       this.decreaseDrugBenefit(drug);
+      if (this.isDafalgan(drug)) {
+        this.decreaseDrugBenefit(drug);
+      }
     }
   }
 
